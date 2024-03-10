@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
 class BusLinesScreen extends StatefulWidget {
   const BusLinesScreen({super.key});
 
