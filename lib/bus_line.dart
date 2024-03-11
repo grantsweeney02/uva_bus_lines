@@ -5,6 +5,7 @@ class BusLine {
   final String longName;
   final String shortName;
   final String textColor;
+  bool isFavorite;
 
   BusLine({
     required this.id,
@@ -13,6 +14,7 @@ class BusLine {
     required this.longName,
     required this.shortName,
     required this.textColor,
+    this.isFavorite = false,
   });
 
   factory BusLine.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,11 @@ class BusLine {
       longName: json['long_name'],
       shortName: json['short_name'],
       textColor: json['text_color'],
+      isFavorite: false,
     );
+  }
+
+  void toggleFavorite() {
+    isFavorite = !isFavorite;
   }
 }
