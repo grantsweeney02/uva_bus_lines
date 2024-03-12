@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'bus_line.dart';
 import 'bus_route_service.dart';
 import 'package:location/location.dart';
+import 'map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,7 +88,7 @@ class _BusLinesScreenState extends State<BusLinesScreen> {
                     },
                   ),
                   onTap: () {
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (_) => MapScreen(busLine)));
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MapScreen()));
                   },
                 );
               },
