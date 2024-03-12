@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'bus_line.dart';
 import 'bus_route_service.dart';
+import 'package:location/location.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  var location = Location();
+
+  var hasPermission = await location.hasPermission();
+  if (hasPermission == PermissionStatus.denied) {
+    hasPermission = await location.requestPermission();
+  }
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       // Set the background color of the app
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.black12,
+        scaffoldBackgroundColor: const Color.fromRGBO(229, 229, 229, 1.0),
       ),
       home: const BusLinesScreen(),
     );
@@ -43,9 +52,12 @@ class _BusLinesScreenState extends State<BusLinesScreen> {
       appBar: AppBar(
         title: const Text(
             "Bus Lines",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            ),
         ),
-        backgroundColor: Colors.black45,
+        backgroundColor: const Color.fromRGBO(20, 33, 61, 1.0),
       ),
       body: Column(
         children: [
@@ -59,7 +71,7 @@ class _BusLinesScreenState extends State<BusLinesScreen> {
                     busLine.longName,
                     style: TextStyle(
                       color: busLine.textColor.toUpperCase() == 'FFFFFF'
-                          ? Colors.white
+                          ? Colors.black
                           : Color(int.parse('0xff${busLine.textColor}')),
                     ),
                   ),

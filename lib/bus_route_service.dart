@@ -4,10 +4,11 @@ import 'bus_line.dart';
 import 'bus_stop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const String busDataUrl = 'https://www.cs.virginia.edu/~pm8fc/busses/busses.json';
+
 Future<List<BusLine>> fetchBusLines() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  const String url = 'https://www.cs.virginia.edu/~pm8fc/busses/busses.json';
-  final response = await http.get(Uri.parse(url));
+  final response = await http.get(Uri.parse(busDataUrl));
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> decodedData = json.decode(response.body);
@@ -31,8 +32,7 @@ Future<List<BusLine>> fetchBusLines() async {
 }
 
 Future<List<BusStop>> fetchStopsForLine(int lineId) async {
-  const String url = 'https://www.cs.virginia.edu/~pm8fc/busses/busses.json';
-  final response = await http.get(Uri.parse(url));
+  final response = await http.get(Uri.parse(busDataUrl));
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> decodedData = json.decode(response.body);
