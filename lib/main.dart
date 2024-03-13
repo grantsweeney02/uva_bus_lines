@@ -52,11 +52,11 @@ class _BusLinesScreenState extends State<BusLinesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-            "Bus Lines",
-            style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold
-            ),
+          "Bus Lines",
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+          ),
         ),
         backgroundColor: const Color.fromRGBO(20, 33, 61, 1.0),
       ),
@@ -88,8 +88,12 @@ class _BusLinesScreenState extends State<BusLinesScreen> {
                     },
                   ),
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MapScreen()));
-                  },
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapScreen(selectedBusLine: busLine),
+                      ),
+                    );},
                 );
               },
             ),
