@@ -38,12 +38,9 @@ Future<List<BusStop>> fetchStopsForLine(int lineId) async {
     final Map<String, dynamic> decodedData = json.decode(response.body);
     final List<dynamic> routesJson = decodedData['routes'];
     final List<dynamic> stopsJson = decodedData['stops'];
-
     final route = routesJson.firstWhere((route) => route['id'] == lineId, orElse: () => null);
     if (route == null) return [];
-
     final List<int> stopIds = List<int>.from(route['stops']);
-
     List<BusStop> stops = stopsJson.where((stop) => stopIds.contains(stop['id'])).map((json) => BusStop.fromJson(json)).toList();
     return stops;
   } else {

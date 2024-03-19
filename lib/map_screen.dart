@@ -1,7 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'bus_route_service.dart';
 import 'package:location/location.dart';
 import 'bus_line.dart';
+import 'bus_stop.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -18,6 +21,9 @@ class _MapScreenState extends State<MapScreen> {
   late final BusLine selectedBusLine;
   late LatLngBounds mapBounds;
   late LatLng center;
+  late List<BusStop> stops = [];
+  late List<Marker> markers = [];
+  Location location = Location();
 
   @override
   void initState() {
@@ -32,10 +38,58 @@ class _MapScreenState extends State<MapScreen> {
       (south + north) / 2,
       (west + east) / 2,
     );
+    _createMarkers();
+    _getUserLocation();
+  }
+
+  void _getUserLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
+
+    print("Looking at permissions");
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+    print("Getting location");
+    locationData = await location.getLocation();
+    print('User Location: ${locationData.latitude}, ${locationData.longitude}');
   }
 
 
 
+  void _createMarkers() async {
+    List<BusStop> fetchedStops = await fetchStopsForLine(selectedBusLine.id);
+    setState(() {
+      stops = fetchedStops;
+    });
+    setState(() {
+      markers = stops.map((stop) =>
+          Marker(
+            width: 80.0,
+            height: 80.0,
+            point: LatLng(stop.position[0], stop.position[1]),
+            child: IconButton(
+              icon: const Icon(Icons.location_on),
+              color: Colors.red,
+              onPressed: () => _onMarkerPressed(stop.name),
+            ),
+          )).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +98,8 @@ class _MapScreenState extends State<MapScreen> {
         title: Text(
           selectedBusLine.longName,
           style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold
+              color: Colors.white,
+              fontWeight: FontWeight.bold
           ),
         ),
         backgroundColor: const Color.fromRGBO(20, 33, 61, 1.0),
@@ -57,23 +111,35 @@ class _MapScreenState extends State<MapScreen> {
         options: MapOptions(
           initialCenter: center,
           initialZoom: 13.0,
-          minZoom: 10.0,
-          maxZoom: 18.0,
         ),
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
           ),
-          // const RichAttributionWidget(
-          //   attributions: [
-          //     TextSourceAttribution(
-          //       'OpenStreetMap contributors',
-          //     ),
-          //   ],
-          // ),
+          MarkerLayer(markers: markers),
         ],
       ),
+    );
+  }
+
+  void _onMarkerPressed(String stopName) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Bus Stop'),
+          content: Text(stopName),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

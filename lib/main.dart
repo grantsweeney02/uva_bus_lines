@@ -12,7 +12,6 @@ void main() async {
   if (hasPermission == PermissionStatus.denied) {
     hasPermission = await location.requestPermission();
   }
-
   runApp(const MyApp());
 }
 
