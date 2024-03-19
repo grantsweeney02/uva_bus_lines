@@ -4,13 +4,13 @@
 <dict>
     <key>io.flutter.embedded_views_preview</key>
     <string>YES</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need access to your location when the app is in use to show you your current location on the map.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>We need access to your location to provide navigation updates even when the app is not in use.</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app needs access to your location to show your position on the map.</string>
-	<key>CFBundleDevelopmentRegion</key>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>We need your location to show nearby bus stops</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>We need your location to provide updates on buses near you</string>
+
+    <key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>UVA Bus Lines</string>

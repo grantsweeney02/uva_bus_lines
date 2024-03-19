@@ -24,6 +24,7 @@ class _MapScreenState extends State<MapScreen> {
   late List<BusStop> stops = [];
   late List<Marker> markers = [];
   Location location = Location();
+  late LocationData locationData;
 
   @override
   void initState() {
@@ -42,12 +43,28 @@ class _MapScreenState extends State<MapScreen> {
     _getUserLocation();
   }
 
+  void _updateUserLocationMarker() {
+    print("making user marker");
+    setState(() {
+      double? userLatitude = locationData.latitude;
+      double? userLongitude = locationData.longitude;
+      final userLocationMarker = Marker(
+        width: 80.0,
+        height: 80.0,
+        point: LatLng(userLatitude!, userLongitude!),
+        child: IconButton(
+          icon: const Icon(Icons.person_pin_circle),
+          color: Colors.blue,
+          onPressed: () => _onMarkerPressed("Your Location"),
+        ),
+      );
+      markers.add(userLocationMarker);
+    });
+  }
+
   void _getUserLocation() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    print("Looking at permissions");
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -64,9 +81,10 @@ class _MapScreenState extends State<MapScreen> {
         return;
       }
     }
-    print("Getting location");
+
     locationData = await location.getLocation();
     print('User Location: ${locationData.latitude}, ${locationData.longitude}');
+    _updateUserLocationMarker();
   }
 
 
