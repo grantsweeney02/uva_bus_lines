@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'bus_route_service.dart';
 import 'package:location/location.dart';
@@ -18,13 +19,14 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final BusLine selectedBusLine;
-  late LatLngBounds mapBounds;
   late LatLng center;
   late List<BusStop> stops = [];
   late List<Marker> markers = [];
   Location location = Location();
   late LocationData locationData;
   String? selectedStopName;
+  int? selectedStopId;
+
 
 
   @override
@@ -35,7 +37,6 @@ class _MapScreenState extends State<MapScreen> {
     double west = widget.selectedBusLine.bounds[1];
     double north = widget.selectedBusLine.bounds[2];
     double east = widget.selectedBusLine.bounds[3];
-    mapBounds = LatLngBounds(LatLng(south, west), LatLng(north, east));
     center = LatLng(
       (south + north) / 2,
       (west + east) / 2,
@@ -48,16 +49,23 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       double? userLatitude = locationData.latitude;
       double? userLongitude = locationData.longitude;
+      Color color = Colors.blue;
+      if (selectedStopId == -1) {
+        color = Colors.purple;
+      }
+
       final userLocationMarker = Marker(
         width: 80.0,
         height: 80.0,
         point: LatLng(userLatitude!, userLongitude!),
         child: IconButton(
           icon: const Icon(Icons.person_pin_circle),
-          color: Colors.blue,
+          color: color,
           onPressed: () {
             setState(() {
+              selectedStopId = -1;
               selectedStopName = "Your Location";
+              _createMarkers();
             });
           },
         ),
@@ -89,30 +97,37 @@ class _MapScreenState extends State<MapScreen> {
     _updateUserLocationMarker();
   }
 
-
-
   void _createMarkers() async {
     List<BusStop> fetchedStops = await fetchStopsForLine(selectedBusLine.id);
     setState(() {
       stops = fetchedStops;
     });
     setState(() {
-      markers = stops.map((stop) =>
-          Marker(
-            width: 80.0,
-            height: 80.0,
-            point: LatLng(stop.position[0], stop.position[1]),
-            child: IconButton(
-              icon: const Icon(Icons.location_on),
-              color: Colors.red,
-              onPressed: () {
-                setState(() {
-                  selectedStopName = stop.name; // Show popup for this stop
-                });
-              },
-            ),
-          )).toList();
+      markers = stops.map((stop) {
+        Color color = Colors.red;
+        if (selectedStopId == stop.id) {
+          color = Colors.purple;
+        }
+
+        return Marker(
+          width: 80.0,
+          height: 80.0,
+          point: LatLng(stop.position[0], stop.position[1]),
+          child: IconButton(
+            icon: const Icon(Icons.location_on),
+            color: color,
+            onPressed: () {
+              setState(() {
+                selectedStopId = selectedStopId == stop.id ? null : stop.id;
+                selectedStopName = stop.name;
+              });
+              _createMarkers();
+            },
+          ),
+        );
+      }).toList();
     });
+    _updateUserLocationMarker();
   }
 
   @override
