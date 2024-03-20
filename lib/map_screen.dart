@@ -26,8 +26,8 @@ class _MapScreenState extends State<MapScreen> {
   late List<Marker> markers = [];
   Location location = Location();
   late LocationData locationData;
+  String? selectedStopName;
 
-  final PopupController _popupLayerController = PopupController();
 
   @override
   void initState() {
@@ -57,7 +57,11 @@ class _MapScreenState extends State<MapScreen> {
         child: IconButton(
           icon: const Icon(Icons.person_pin_circle),
           color: Colors.blue,
-          onPressed: () => {},
+          onPressed: () {
+            setState(() {
+              selectedStopName = "Your Location";
+            });
+          },
         ),
       );
       markers.add(userLocationMarker);
@@ -103,9 +107,12 @@ class _MapScreenState extends State<MapScreen> {
             child: IconButton(
               icon: const Icon(Icons.location_on),
               color: Colors.red,
-              onPressed: () {  },
+              onPressed: () {
+                setState(() {
+                  selectedStopName = stop.name; // Show popup for this stop
+                });
+              },
             ),
-
           )).toList();
     });
   }
@@ -126,30 +133,42 @@ class _MapScreenState extends State<MapScreen> {
           color: Colors.white,
         ),
       ),
-      body: FlutterMap(
-        options: MapOptions(
-          initialCenter: center,
-          initialZoom: 13.0,
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.example.app',
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: 13.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.app',
+              ),
+              MarkerLayer(markers: markers),
+            ],
           ),
-          PopupMarkerLayer(
-            options: PopupMarkerLayerOptions(
-              popupController: _popupLayerController,
-              markers: markers,
-              popupDisplayOptions: PopupDisplayOptions(
-                builder: (BuildContext context, Marker marker) {
-                  var stop = findStopByLatLng(marker.point);
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(stop.name, style: const TextStyle(fontSize: 16)),
-                    ),
-                  );
-                },
+          if (selectedStopName != null) Positioned(
+            bottom: 20.0,
+            left: 20.0,
+            right: 20.0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                selectedStopName!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16.0),
               ),
             ),
           ),
@@ -157,27 +176,24 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-  BusStop findStopByLatLng(LatLng point) {
-    return stops.firstWhere((stop) => stop.position == [point.latitude, point.longitude]);
-  }
 
-  // void _onMarkerPressed(String stopName) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text('Bus Stop'),
-  //         content: Text(stopName),
-  //         actions: <Widget>[
-  //           ElevatedButton(
-  //             child: const Text('Close'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  void _onMarkerPressed(String stopName) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Bus Stop'),
+          content: Text(stopName),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
