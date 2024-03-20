@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'bus_route_service.dart';
 import 'package:location/location.dart';
@@ -7,7 +5,7 @@ import 'bus_line.dart';
 import 'bus_stop.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+
 
 class MapScreen extends StatefulWidget {
   final BusLine selectedBusLine;
@@ -174,26 +172,6 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _onMarkerPressed(String stopName) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Bus Stop'),
-          content: Text(stopName),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }
