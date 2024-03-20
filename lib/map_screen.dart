@@ -7,6 +7,7 @@ import 'bus_line.dart';
 import 'bus_stop.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 
 class MapScreen extends StatefulWidget {
   final BusLine selectedBusLine;
@@ -26,6 +27,8 @@ class _MapScreenState extends State<MapScreen> {
   Location location = Location();
   late LocationData locationData;
 
+  final PopupController _popupLayerController = PopupController();
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +47,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _updateUserLocationMarker() {
-    print("making user marker");
     setState(() {
       double? userLatitude = locationData.latitude;
       double? userLongitude = locationData.longitude;
@@ -55,7 +57,7 @@ class _MapScreenState extends State<MapScreen> {
         child: IconButton(
           icon: const Icon(Icons.person_pin_circle),
           color: Colors.blue,
-          onPressed: () => _onMarkerPressed("Your Location"),
+          onPressed: () => {},
         ),
       );
       markers.add(userLocationMarker);
@@ -65,7 +67,6 @@ class _MapScreenState extends State<MapScreen> {
   void _getUserLocation() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -83,7 +84,6 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     locationData = await location.getLocation();
-    print('User Location: ${locationData.latitude}, ${locationData.longitude}');
     _updateUserLocationMarker();
   }
 
@@ -103,8 +103,9 @@ class _MapScreenState extends State<MapScreen> {
             child: IconButton(
               icon: const Icon(Icons.location_on),
               color: Colors.red,
-              onPressed: () => _onMarkerPressed(stop.name),
+              onPressed: () {  },
             ),
+
           )).toList();
     });
   }
@@ -135,29 +136,48 @@ class _MapScreenState extends State<MapScreen> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
           ),
-          MarkerLayer(markers: markers),
+          PopupMarkerLayer(
+            options: PopupMarkerLayerOptions(
+              popupController: _popupLayerController,
+              markers: markers,
+              popupDisplayOptions: PopupDisplayOptions(
+                builder: (BuildContext context, Marker marker) {
+                  var stop = findStopByLatLng(marker.point);
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(stop.name, style: const TextStyle(fontSize: 16)),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
-
-  void _onMarkerPressed(String stopName) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Bus Stop'),
-          content: Text(stopName),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  BusStop findStopByLatLng(LatLng point) {
+    return stops.firstWhere((stop) => stop.position == [point.latitude, point.longitude]);
   }
+
+  // void _onMarkerPressed(String stopName) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: const Text('Bus Stop'),
+  //         content: Text(stopName),
+  //         actions: <Widget>[
+  //           ElevatedButton(
+  //             child: const Text('Close'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }
